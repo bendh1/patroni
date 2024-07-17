@@ -70,3 +70,5 @@ data/
 
 # macOS
 **/.DS_Store
+
+*.back
