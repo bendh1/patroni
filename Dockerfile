@@ -156,6 +156,7 @@ COPY postgres?.yml $PGHOME/
 WORKDIR $PGHOME
 
 RUN sed -i 's/env python/&3/' /patroni*.py \
+    # && chown -R postgres:postgres "$PGHOME" \
     # "fix" patroni configs
     && sed -i 's/^  listen: 127.0.0.1/  listen: 0.0.0.0/' postgres?.yml \
     && sed -i "s|^\(  data_dir: \).*|\1$PGDATA|" postgres?.yml \
@@ -167,9 +168,12 @@ RUN sed -i 's/env python/&3/' /patroni*.py \
     && sed -i 's/^      pg_hba:/&\n      - local all all trust/' postgres?.yml \
     && sed -i 's/^\(.*\) \(.*\) md5/\1 all md5/' postgres?.yml \
     && if [ "$COMPRESS" = "true" ]; then chmod u+s /usr/bin/sudo; fi \
+    && mkdir -p "$PGDATA" \
+    && chmod -R 755 "$PGDATA" \
     && chmod +s /bin/ping \
     && chown -R postgres:postgres "$PGHOME" /run /etc/haproxy
 
 USER postgres
+# USER root
 
 ENTRYPOINT ["/bin/sh", "/entrypoint.sh"]
